@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Logs and backups — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Logs</h1>
+  <p>File log: <code>data/logs/app.log</code>. Background server log: <code>data/logs/server.log</code>.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>When</th><th>Level</th><th>Message</th></tr></thead>
+      <tbody>
+        {% for row in logs %}
+        <tr>
+          <td>{{ row.created_at }}</td>
+          <td>{{ row.level }}</td>
+          <td>{{ row.message }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">No log rows yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="card">
+  <h2>Backups</h2>
+  <form method="post" action="/backups">
+    <button type="submit">Create backup</button>
+  </form>
+  {% if backups %}
+  <ul>
+    {% for name in backups %}
+    <li><a href="/backups/{{ name }}">{{ name }}</a></li>
+    {% endfor %}
+  </ul>
+  <form method="post" action="/backups/restore" class="stack">
+    <label>Backup
+      <select name="name">
+        {% for name in backups %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" name="confirm_restore" value="1"> Replace the live database with this backup</label>
+    <button type="submit">Restore</button>
+  </form>
+  {% else %}
+  <p>No backup files yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

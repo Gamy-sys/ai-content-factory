@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Content calendar — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Content calendar</h1>
+  <p>Stored in SQLite. Saving a slot does not call Ollama. The daily 08:00 Asia/Seoul job creates drafts only after you enable it in Settings.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Day</th><th>Category</th><th>Platform</th><th>Count</th><th>On</th><th>Notes</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for slot in slots %}
+        <tr>
+          <td>{{ weekdays[slot.weekday] }}</td>
+          <td>{{ slot.category }}</td>
+          <td>{{ slot.platform }}</td>
+          <td>{{ slot.count }}</td>
+          <td>{{ "yes" if slot.enabled else "no" }}</td>
+          <td>{{ slot.notes }}</td>
+          <td>
+            <form method="post" action="/calendar/{{ slot.id }}/delete">
+              <button class="quiet" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">No slots. The network has not been called.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="card">
+  <h2>Add or replace a slot</h2>
+  <form method="post" action="/calendar" class="stack">
+    <label>Existing slot id (leave empty to add) <input name="slot_id" inputmode="numeric"></label>
+    <label>Weekday
+      <select name="weekday">
+        {% for name in weekdays %}
+        <option value="{{ loop.index0 }}">{{ name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Category
+      <select name="category">
+        {% for key, label in categories %}
+        <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Platform
+      <select name="platform">
+        {% for key, label in platforms %}
+        <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Drafts that day <input name="count" type="number" min="1" max="10" value="1" required></label>
+    <label class="check"><input type="checkbox" name="enabled" value="1" checked> Enabled</label>
+    <label>Notes <input name="notes" maxlength="300"></label>
+    <button type="submit">Save slot</button>
+  </form>
+</section>
+{% endblock %}

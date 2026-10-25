@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ item.topic_key }} publishing — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ item.hook }}</h1>
+  <p>Status <strong>{{ item.status }}</strong> · {{ item.platform }} · key <code>{{ item.idempotency_key }}</code></p>
+  <p>{{ summary }}</p>
+  {% if not automated %}
+  <p class="banner warn">Automated posting is not officially available. Use the export. This page cannot mark the post published.</p>
+  {% elif not can_publish %}
+  <p class="banner warn">The official API button is hidden until credentials, and any required public image, are configured. Nothing will be posted by opening this page.</p>
+  {% endif %}
+  {% if item.last_error %}<p class="banner error">{{ item.last_error }}</p>{% endif %}
+  {% if item.external_id %}<p>Confirmed id: {{ item.external_id }} {% if item.external_url %}<a href="{{ item.external_url }}">{{ item.external_url }}</a>{% endif %}</p>{% endif %}
+  {% if item.scheduled_for %}<p>Local schedule: {{ item.scheduled_for }}. The scheduler does not post this.</p>{% endif %}
+  <label>Prepared text
+    <textarea readonly rows="12">{{ item.prepared_text }}</textarea>
+  </label>
+  <p>Hashtags: {{ item.hashtags | join(' ') }}</p>
+  <p><a href="/publishing/{{ item.id }}/export">Download export</a></p>
+</section>
+<section class="grid">
+  {% if can_publish %}
+  <article class="card">
+    <h2>Official API</h2>
+    <p>This sends the post. It is marked published only if the platform returns a success id.</p>
+    <form method="post" action="/publishing/{{ item.id }}/publish">
+      <button type="submit">Publish via official API</button>
+    </form>
+  </article>
+  {% endif %}
+  {% if item.retry_blocked or item.status == "publishing" %}
+  <article class="card">
+    <h2>Uncertain attempt</h2>
+    <p>Do this only after you check the platform and see that the post is not live.</p>
+    <form method="post" action="/publishing/{{ item.id }}/acknowledge">
+      <button type="submit">I checked. It was not posted. Allow one retry</button>
+    </form>
+  </article>
+  {% endif %}
+  {% if item.status in ["approved", "failed"] %}
+  <article class="card">
+    <h2>Schedule locally</h2>
+    <form method="post" action="/publishing/{{ item.id }}/schedule" class="stack">
+      <label>When <input type="datetime-local" name="scheduled_for" required></label>
+      <button class="quiet" type="submit">Save local schedule</button>
+    </form>
+  </article>
+  {% endif %}
+  {% if item.status == "scheduled" %}
+  <article class="card">
+    <h2>Clear schedule</h2>
+    <form method="post" action="/publishing/{{ item.id }}/unschedule">
+      <button class="quiet" type="submit">Return to approved</button>
+    </form>
+  </article>
+  {% endif %}
+  {% if item.status in ["approved", "scheduled", "failed"] %}
+  <article class="card">
+    <h2>Manual queue</h2>
+    <form method="post" action="/publishing/{{ item.id }}/manual">
+      <button class="quiet" type="submit">Use manual export instead</button>
+    </form>
+  </article>
+  {% endif %}
+</section>
+{% endblock %}

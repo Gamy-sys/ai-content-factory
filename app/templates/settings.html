@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Settings — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Settings</h1>
+  <p>Listening on <code>127.0.0.1:{{ port }}</code>. Tokens stay in <code>.env</code> and are not shown here.</p>
+  <ul>
+    <li>Facebook Page token: {{ "configured" if credentials.facebook else "not configured" }}</li>
+    <li>Instagram token: {{ "configured" if credentials.instagram else "not configured" }}</li>
+    <li>Instagram public image URL: {{ "configured" if credentials.instagram_image else "not configured" }}</li>
+    <li>Naver Cafe token: {{ "configured" if credentials.naver_cafe else "not configured" }}</li>
+    <li>Naver Blog: no official write API</li>
+  </ul>
+  <form method="post" action="/settings" class="stack">
+    <label>Ollama host <input name="ollama_host" value="{{ ollama_host }}"></label>
+    <label>Ollama model <input name="ollama_model" value="{{ ollama_model }}"></label>
+    <label class="check"><input type="checkbox" name="job_weekly_calendar" value="1" {% if calendar_on %}checked{% endif %}> Weekly calendar job (drafts only, 08:00 Asia/Seoul)</label>
+    <label class="check"><input type="checkbox" name="job_research_rss" value="1" {% if research_on %}checked{% endif %}> Public RSS research job (09:00 Asia/Seoul)</label>
+    <p class="muted">Calendar last status: {{ calendar_status }}</p>
+    <p class="muted">Research last status: {{ research_status }}</p>
+    <button type="submit">Save settings</button>
+  </form>
+  <form method="post" action="/settings/ollama-check">
+    <button class="quiet" type="submit">Check Ollama</button>
+  </form>
+</section>
+{% endblock %}

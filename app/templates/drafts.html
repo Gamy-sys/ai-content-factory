@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Drafts — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Drafts and approval queue</h1>
+  <form method="get" action="/drafts" class="filters">
+    <label>Category
+      <select name="category">
+        <option value="">All</option>
+        {% for key, label in categories %}
+        <option value="{{ key }}" {% if selected_category == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="">All</option>
+        <option value="draft" {% if selected_status == "draft" %}selected{% endif %}>draft</option>
+        <option value="approved" {% if selected_status == "approved" %}selected{% endif %}>approved</option>
+      </select>
+    </label>
+    <button type="submit">Filter</button>
+  </form>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Topic</th><th>Category</th><th>Platform</th><th>Status</th><th>Review</th></tr>
+      </thead>
+      <tbody>
+        {% for draft in drafts %}
+        <tr>
+          <td><a href="/drafts/{{ draft.id }}">{{ draft.topic_key }}</a><br><span class="muted">{{ draft.hook }}</span></td>
+          <td>{{ draft.category }}</td>
+          <td>{{ draft.platform }}</td>
+          <td>{{ draft.content_status }}</td>
+          <td>{% if draft.review_required %}Needs review{% else %}—{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">No drafts yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="card">
+  <h2>Batch generation</h2>
+  <p>Calls local Ollama. If it is down, you get an error and no invented post.</p>
+  <form method="post" action="/drafts" class="stack">
+    <label>Count <input name="count" type="number" min="1" max="10" value="1" required></label>
+    <fieldset>
+      <legend>Categories</legend>
+      {% for key, label in categories %}
+      <label class="check"><input type="checkbox" name="categories" value="{{ key }}"> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+    <label>Platform
+      <select name="platform">
+        {% for key, label in platforms %}
+        <option value="{{ key }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Generate drafts</button>
+  </form>
+</section>
+{% endblock %}

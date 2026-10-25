@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Analytics</h1>
+  <dl class="stats">
+    <div><dt>Generated</dt><dd>{{ stats.generated }}</dd></div>
+    <div><dt>Approved</dt><dd>{{ stats.approved }}</dd></div>
+    <div><dt>Published</dt><dd>{{ stats.published }}</dd></div>
+    <div><dt>Failed</dt><dd>{{ stats.failed }}</dd></div>
+  </dl>
+  <h2>Inquiries by source</h2>
+  {% if stats.inquiries_by_source %}
+  <ul>
+    {% for row in stats.inquiries_by_source %}
+    <li>{{ row.source }}: {{ row.count }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No inquiries yet.</p>
+  {% endif %}
+</section>
+<section class="card">
+  <h2>Engagement</h2>
+  {% if engagement.status == not_available %}
+  <p><strong>not available</strong></p>
+  <p>{{ engagement.detail }} Naver Blog and Naver Cafe metrics are not available in this app.</p>
+  {% else %}
+  <p>{{ engagement.detail }}</p>
+  <ul>
+    {% for metric in engagement.metrics %}
+    <li>{{ metric.platform }} {{ metric.external_id }} {{ metric.metric_name }}: {{ metric.metric_value }} ({{ metric.source }})</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <form method="post" action="/analytics/engagement">
+    <button class="quiet" type="submit">Check official engagement</button>
+  </form>
+</section>
+<section class="card">
+  <h2>Topic suggestions from this database</h2>
+  <ul>
+    {% for line in suggestions %}
+    <li>{{ line }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ draft.topic_key }} — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ draft.hook }}</h1>
+  <p class="muted">Status {{ draft.content_status }} · {{ draft.platform }} · {{ draft.category }}</p>
+  {% if draft.review_required %}
+  <p class="banner warn">Uncertain language claim: {{ draft.review_reason }}</p>
+  {% endif %}
+  <form method="post" action="/drafts/{{ draft.id }}/save" class="stack">
+    <label>Topic key <input name="topic_key" value="{{ draft.topic_key }}" required></label>
+    <label>Category
+      <select name="category">
+        {% for key, label in categories %}
+        <option value="{{ key }}" {% if draft.category == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Platform
+      <select name="platform">
+        {% for key, label in platforms %}
+        <option value="{{ key }}" {% if draft.platform == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Hook <textarea name="hook" rows="2" required>{{ draft.hook }}</textarea></label>
+    <label>English examples, one per line
+      <textarea name="english_examples" rows="5" required>{{ draft.english_examples | join('\n') }}</textarea>
+    </label>
+    <label>Korean explanation
+      <textarea name="korean_explanation" rows="5" required>{{ draft.korean_explanation }}</textarea>
+    </label>
+    <label>Engagement question
+      <textarea name="engagement_question" rows="2" required>{{ draft.engagement_question }}</textarea>
+    </label>
+    <label>CTA <textarea name="cta" rows="2">{{ draft.cta or "" }}</textarea></label>
+    <label>Hashtags, one per line or separated by spaces
+      <textarea name="hashtags" rows="3" required>{{ draft.hashtags | join('\n') }}</textarea>
+    </label>
+    <label>Carousel outline, one slide per line
+      <textarea name="carousel_outline" rows="4">{{ (draft.carousel_outline or []) | join('\n') }}</textarea>
+    </label>
+    <label class="check"><input type="checkbox" name="uncertain_linguistic_claim" value="1" {% if draft.uncertain_linguistic_claim %}checked{% endif %}> Flag an uncertain linguistic claim</label>
+    <label>Reason <textarea name="uncertainty_reason" rows="2">{{ draft.review_reason }}</textarea></label>
+    <button type="submit">Save draft</button>
+  </form>
+</section>
+<section class="grid">
+  <article class="card">
+    <h2>Regenerate</h2>
+    <p>Replaces this draft's text using Ollama. The old text is kept if Ollama is down.</p>
+    <form method="post" action="/drafts/{{ draft.id }}/regenerate">
+      <button type="submit">Regenerate this draft</button>
+    </form>
+  </article>
+  <article class="card">
+    <h2>Approve</h2>
+    <form method="post" action="/drafts/{{ draft.id }}/approve" class="stack">
+      {% if draft.review_required %}
+      <label class="check"><input type="checkbox" name="human_reviewed" value="1"> I reviewed the language claim</label>
+      {% endif %}
+      <button type="submit">Approve draft</button>
+    </form>
+    <form method="post" action="/drafts/{{ draft.id }}/queue">
+      <button class="quiet" type="submit">Send approved draft to publishing queue</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

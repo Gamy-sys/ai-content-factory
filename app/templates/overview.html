@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Overview — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Overview</h1>
+  <p>This process stays on this computer. Scheduled jobs are off until you turn them on, and they never publish.</p>
+  <dl class="stats">
+    <div><dt>Generated</dt><dd>{{ stats.generated }}</dd></div>
+    <div><dt>Approved</dt><dd>{{ stats.approved }}</dd></div>
+    <div><dt>Published</dt><dd>{{ stats.published }}</dd></div>
+    <div><dt>Failed</dt><dd>{{ stats.failed }}</dd></div>
+  </dl>
+</section>
+<section class="grid">
+  <article class="card">
+    <h2>Ollama</h2>
+    <p>Host <code>{{ ollama_host }}</code></p>
+    <p>Model <code>{{ ollama_model }}</code></p>
+    <p>Suggested for 16 GB RAM: <code>qwen2.5:7b</code>. If Ollama is down, generation stops and no post is invented.</p>
+  </article>
+  <article class="card">
+    <h2>Jobs</h2>
+    <p>Weekly calendar: {{ "on" if jobs.weekly_calendar else "off" }}. Last: {{ jobs.calendar_status }}</p>
+    <p>Public RSS research: {{ "on" if jobs.research_rss else "off" }}. Last: {{ jobs.research_status }}</p>
+    <p>The calendar job only creates drafts for today's slots. It does not publish.</p>
+  </article>
+</section>
+{% endblock %}

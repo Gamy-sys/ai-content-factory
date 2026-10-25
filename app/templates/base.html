@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Local English studio{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <p class="eyebrow">127.0.0.1 only</p>
+      <p class="brand">Local English studio</p>
+    </div>
+    <p class="tagline">Drafts for Korean adults learning practical English. Nothing is posted unless you confirm it.</p>
+  </header>
+  <nav>
+    <ul>
+      {% for href, label in nav_items %}
+      <li><a href="{{ href }}" class="{% if nav_active(request.url.path, href) %}active{% endif %}">{{ label }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+  <main>
+    {% if error %}<p class="banner error">{{ error }}</p>{% endif %}
+    {% if notice %}<p class="banner notice">{{ notice }}</p>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

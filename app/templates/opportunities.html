@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Community — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Community opportunities</h1>
+  <p>Approving a reply only stores your decision. There is no submit action, and this app does not post comments or messages.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Topic</th><th>Source</th><th>When</th><th>Relevance</th><th>Rules</th><th>Decision</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for item in opportunities %}
+        <tr>
+          <td><a href="{{ item.url }}">{{ item.topic }}</a><br><span class="muted">{{ item.url }}</span></td>
+          <td>{{ item.source }}<br><span class="muted">{{ item.imported_via }}</span></td>
+          <td>{{ item.discovered_at }}</td>
+          <td>{{ item.relevance }}</td>
+          <td>{% if item.uncertain_rules %}Uncertain: {{ item.uncertain_reason }}{% else %}—{% endif %}</td>
+          <td>{{ item.approval_status }}</td>
+          <td>
+            <form method="post" action="/opportunities/{{ item.id }}/approve"><button type="submit">Approve</button></form>
+            <form method="post" action="/opportunities/{{ item.id }}/reject"><button class="quiet" type="submit">Reject</button></form>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="7"><pre class="reply">{{ item.suggested_reply }}</pre></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">No opportunities yet. The scheduled feed stays off until you enable it.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="card">
+  <h2>Manual URL import</h2>
+  <p>The page is not fetched. Paste only what you want stored.</p>
+  <form method="post" action="/opportunities/import" class="stack">
+    <label>URL <input name="url" type="url" required placeholder="https://"></label>
+    <label>Topic <input name="topic" required></label>
+    <label>Excerpt you pasted <textarea name="excerpt" rows="4"></textarea></label>
+    <label>Reply language
+      <select name="reply_language">
+        <option value="ko">Korean</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+    <button type="submit">Import URL</button>
+  </form>
+</section>
+{% endblock %}

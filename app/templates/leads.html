@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Leads — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Lead tracker</h1>
+  <p>People who volunteered an inquiry. This app does not scrape profiles and does not send messages.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Source</th><th>Date</th><th>Goal</th><th>Consent</th><th>Preference</th><th>Trial</th><th>Follow-up</th></tr>
+      </thead>
+      <tbody>
+        {% for lead in leads %}
+        <tr>
+          <td><a href="/leads/{{ lead.id }}">{{ lead.display_name or "Inquiry" }}</a></td>
+          <td>{{ lead.source }}</td>
+          <td>{{ lead.inquiry_date }}</td>
+          <td>{{ lead.learning_goal }}</td>
+          <td>{{ "yes" if lead.consent else "no" }}</td>
+          <td>{{ lead.communication_preference }}</td>
+          <td>{{ lead.trial_lesson_status }}</td>
+          <td>{{ lead.follow_up_on or "—" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">No inquiries yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="card">
+  <h2>{% if editing %}Edit inquiry{% else %}New inquiry{% endif %}</h2>
+  <form method="post" action="{% if editing %}/leads/{{ editing.id }}{% else %}/leads{% endif %}" class="stack">
+    <label>Name they gave <input name="display_name" value="{{ editing.display_name if editing else '' }}"></label>
+    <label>Source <input name="source" required value="{{ editing.source if editing else '' }}"></label>
+    <label>Inquiry date <input type="date" name="inquiry_date" required value="{{ editing.inquiry_date if editing else '' }}"></label>
+    <label>Learning goal <textarea name="learning_goal" required rows="3">{{ editing.learning_goal if editing else '' }}</textarea></label>
+    <label class="check"><input type="checkbox" name="consent" value="1" {% if editing and editing.consent %}checked{% endif %}> Consent recorded</label>
+    <label>Communication preference
+      <select name="communication_preference">
+        {% for pref in preferences %}
+        <option value="{{ pref }}" {% if editing and editing.communication_preference == pref %}selected{% endif %}>{{ pref }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Trial lesson
+      <select name="trial_lesson_status">
+        {% for status in trials %}
+        <option value="{{ status }}" {% if editing and editing.trial_lesson_status == status %}selected{% endif %}>{{ status }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Follow-up date <input type="date" name="follow_up_on" value="{{ editing.follow_up_on if editing and editing.follow_up_on else '' }}"></label>
+    <label>Notes <textarea name="notes" rows="3">{{ editing.notes if editing else '' }}</textarea></label>
+    <label class="check"><input type="checkbox" name="allow_duplicate" value="1"> Allow a duplicate source, date, and goal</label>
+    <button type="submit">Save lead</button>
+  </form>
+</section>
+{% endblock %}

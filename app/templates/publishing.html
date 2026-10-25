@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Publishing — Local English studio{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Publishing status</h1>
+  <p>A row becomes published only after a confirmed platform response. Manual items stay in the export queue.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Draft</th><th>Platform</th><th>Status</th><th>External id</th></tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td><a href="/publishing/{{ item.id }}">{{ item.topic_key }}</a></td>
+          <td>{{ item.platform }}</td>
+          <td>{{ item.status }}{% if item.retry_blocked %} (retry locked){% endif %}</td>
+          <td>{{ item.external_id or "—" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No items in the queue.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
