@@ -37,6 +37,18 @@ Platform = Literal["instagram", "facebook", "naver_blog", "naver_cafe"]
 
 _TOPIC_KEY = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _HANGUL = re.compile(r"[\uac00-\ud7a3]")
+_TOPIC_MAX = 80
+
+
+def slugify_text(value: object) -> str:
+    """Turn a messy label into a lowercase hyphenated slug."""
+    text = str(value or "").lower()
+    text = re.sub(r"[\s_]+", "-", text)
+    text = re.sub(r"[^a-z0-9-]", "", text)
+    text = re.sub(r"-{2,}", "-", text).strip("-")
+    if len(text) > _TOPIC_MAX:
+        text = text[:_TOPIC_MAX].strip("-")
+    return text
 
 
 def _as_list(value: object) -> object:
@@ -62,11 +74,27 @@ class DraftContent(BaseModel):
     uncertain_linguistic_claim: bool
     uncertainty_reason: str = ""
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_topic_key(cls, data):
+        if not isinstance(data, dict):
+            return data
+        slug = slugify_text(data.get("topic_key"))
+        if not slug:
+            slug = slugify_text(data.get("topic"))
+        if not slug:
+            slug = slugify_text(data.get("hook"))
+        if not slug:
+            return data
+        updated = dict(data)
+        updated["topic_key"] = slug
+        return updated
+
     @field_validator("topic_key")
     @classmethod
     def topic_slug(cls, value: str) -> str:
-        slug = value.strip().lower()
-        if not _TOPIC_KEY.fullmatch(slug) or len(slug) > 80:
+        slug = slugify_text(value)
+        if not _TOPIC_KEY.fullmatch(slug):
             raise ValueError("topic_key must be a lowercase hyphenated slug")
         return slug
 

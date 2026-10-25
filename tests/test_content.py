@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from pydantic import ValidationError
 
 from app.content.ollama import OllamaClient, OllamaUnavailable
 from app.content.schema import CATEGORY_LABELS, DraftContent
@@ -23,6 +24,18 @@ from tests.ollama_server import FakeOllama
 def test_category_labels_match_schema():
     allowed = set(DraftContent.model_fields["category"].annotation.__args__)
     assert allowed == set(CATEGORY_LABELS)
+
+
+def test_messy_topic_key_becomes_a_slug():
+    model = DraftContent.model_validate(valid_draft(topic_key="Insta Practical English!"))
+    assert model.topic_key == "insta-practical-english"
+    from_topic = valid_draft(topic_key="!!!", hook="Been and gone are not the same trip.")
+    from_topic["topic"] = "Present Perfect Time"
+    assert DraftContent.model_validate(from_topic).topic_key == "present-perfect-time"
+    from_hook = valid_draft(topic_key="---", hook="Been and gone are not the same trip.")
+    assert DraftContent.model_validate(from_hook).topic_key == "been-and-gone-are-not-the-same-trip"
+    with pytest.raises(ValidationError):
+        DraftContent.model_validate({"topic_key": "Insta Practical English!"})
 
 
 def test_fake_ollama_generates_draft_and_sends_json_format(tmp_path):
